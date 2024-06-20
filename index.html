@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HPVワクチン接種判定ツール</title>
+    <script>
+        function calculateDates() {
+            const age = parseInt(document.getElementById('age').value);
+            const firstDoseDate = new Date(document.getElementById('firstDoseDate').value);
+            const result = document.getElementById('result');
+
+            if (isNaN(age) || isNaN(firstDoseDate)) {
+                result.innerHTML = '正しい情報を入力してください。';
+                return;
+            }
+
+            let secondDoseDate, thirdDoseDate, scheduleInfo;
+
+            if (age < 15) {
+                scheduleInfo = `
+                    <p>●初回接種が15歳未満の場合</p>
+                    <p>2回接種：初回から6か月以上あけて2回目</p>
+                `;
+                secondDoseDate = new Date(firstDoseDate);
+                secondDoseDate.setMonth(secondDoseDate.getMonth() + 6);
+            } else {
+                scheduleInfo = `
+                    <p>●初回接種が15歳以上の場合</p>
+                    <p>3回接種：初回から2ヶ月以上あけて2回目、初回から6ヶ月以上あけて3回目</p>
+                `;
+                secondDoseDate = new Date(firstDoseDate);
+                thirdDoseDate = new Date(firstDoseDate);
+                secondDoseDate.setMonth(secondDoseDate.getMonth() + 2);
+                thirdDoseDate.setMonth(thirdDoseDate.getMonth() + 6);
+            }
+
+            const endDate = new Date(firstDoseDate);
+            endDate.setFullYear(endDate.getFullYear() + 1);
+            const isWithinOneYear = thirdDoseDate <= endDate;
+
+            result.innerHTML = `
+                <p>HPVワクチンの公費接種対象: ${isWithinOneYear ? '対象' : '対象外'}</p>
+                <p>初回接種日: ${firstDoseDate.toLocaleDateString()}</p>
+                ${age < 15 ? `<p>2回目接種日: ${secondDoseDate.toLocaleDateString()} 以降</p>` : `
+                <p>2回目接種日: ${secondDoseDate.toLocaleDateString()} 以降</p>
+                <p>3回目接種日: ${thirdDoseDate.toLocaleDateString()} 以降</p>`}
+                ${scheduleInfo}
+                <img src="スクリーンショット 2024-06-20 19.09.14.png" alt="接種スケジュール">
+            `;
+        }
+    </script>
+</head>
+<body>
+    <h1>HPVワクチン接種判定ツール</h1>
+    <form onsubmit="event.preventDefault(); calculateDates();">
+        <label for="age">初回接種時の年齢:</label>
+        <input type="number" id="age" required><br><br>
+        <label for="firstDoseDate">初回接種日:</label>
+        <input type="date" id="firstDoseDate" required><br><br>
+        <button type="submit">判定する</button>
+    </form>
+    <div id="result"></div>
+</body>
+</html>
